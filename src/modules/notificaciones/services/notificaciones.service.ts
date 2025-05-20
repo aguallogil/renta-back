@@ -3,25 +3,23 @@ import * as webpush from 'web-push';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { PushSubscription as PushSubscriptionDocument } from '../models/push-subscription.model';
-
+import { ConfigService } from '@nestjs/config';
 // Llaves VAPID generadas con webpush.generateVAPIDKeys()
-const VAPID_KEYS = {
-  publicKey: 'BCLNL1qLdW2hGFyqrx4Eifn2lUSLb9mHAh8ciUOshZaz9ete8Q9H6kubvCwlfJX9hWoNbu60rYLFE83R4p48MhQ',
-  privateKey: 'HxfkVqjyNWDsDCbKKVl7ORvS-fnoeifjuDByh2De2qI',
-};
 
-webpush.setVapidDetails(
-  'mailto:tuemail@dominio.com',
-  VAPID_KEYS.publicKey,
-  VAPID_KEYS.privateKey,
-);
 
 @Injectable()
 export class NotificacionesService {
   constructor(
     @InjectModel(PushSubscriptionDocument.name)
     private readonly subModel: Model<PushSubscriptionDocument>,
-  ) {}
+    private readonly configService: ConfigService
+  ) {
+    webpush.setVapidDetails(
+      this.configService.get<string>('VAPID_EMAIL'),
+      this.configService.get<string>('VAPID_PUBLIC_KEY'),
+      this.configService.get<string>('VAPID_PRIVATE_KEY'),
+    );
+  }
 
   async registrar(sub: any, userId: string): Promise<void> {
     const existe = await this.subModel.findOne({ endpoint: sub.endpoint });
