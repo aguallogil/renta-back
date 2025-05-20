@@ -3,8 +3,12 @@ import { Cron } from '@nestjs/schedule';
 import { RentaService } from '../../renta/services/renta.service';
 import { NotificacionesService } from './notificaciones.service';
 import { PushSubscription as PushSubscriptionDocument } from '../models/push-subscription.model';
-import * as crypto from 'crypto';
-(global as any).crypto = crypto;
+import { webcrypto } from 'crypto';
+
+if (!(globalThis as any).crypto) {
+  (globalThis as any).crypto = webcrypto;
+}
+
 
 
 @Injectable()
